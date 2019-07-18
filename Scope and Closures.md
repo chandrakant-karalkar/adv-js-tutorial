@@ -48,7 +48,7 @@ Finally if it is unable to find it, it throws out an Error.
 Time for a quick [Quiz](src/quiz-files/quiz1.js):
 
 **Nested Scope**:
-We mentioned Scope is a set od rules for looking up variables, but there is usually more than one Scope to consider.
+We mentioned Scope is a set of rules for looking up variables, but there is usually more than one Scope to consider.
 If a variable is not found in the current Scope collection continue looking until found or outermost/global scope has been reached.
 [Demo](src/demo-files/demo3.js)
 
@@ -289,3 +289,210 @@ While multiple/duplicate `var` declarations are effectively ignored, subsequent 
 
 **Chapter 4**: Scope Closure
 -----------------------------------------
+We arrive at this point with hopefully a very healthy, solid understanding of how scope works.
+
+Let's check what closure is:
+
+Closure is when a function is able to remember and access its lexical scope even when that function is executing outside its lexical scope.
+
+Let's look at following example:
+
+```js
+    function foo() {
+        var a = 2;
+    
+        function bar() {
+            console.log( a ); // 2
+        }
+    
+        bar();
+    }
+    
+    foo();
+``` 
+
+This code should look familiar from our discussions of Nested Scope. Function `bar()` has *access* to the variable `a` in the outer enclosing scope because of lexical scope look-up rules (in this case, it's an RHS reference look-up).
+
+Is this "closure"?
+
+Well, technically... *perhaps*. But by our what-you-need-to-know definition above... *not exactly*. I think the most accurate way to explain `bar()` referencing `a` is via lexical scope look-up rules, and those rules are *only* (an important!) **part** of what closure is.
+
+function `bar()` has a *closure* over the scope of `foo()` (and indeed, even over the rest of the scopes it has access to, such as the global scope in our case). Put slightly differently, it's said that `bar()` closes over the scope of `foo()`. Why? Because `bar()` appears nested inside of `foo()`. Plain and simple.
+
+But, closure defined in this way is not directly *observable*, nor do we see closure *exercised* in that snippet. We clearly see lexical scope,
+
+Let's consider the following [Demo](src/demo-files/closure1.js)
+
+The function `bar()` has lexical scope access to the inner scope of `foo()`. But then, we take `bar()`, the function itself, and pass it *as* a value. In this case, we `return` the function object itself that `bar` references.
+
+After we execute `foo()`, we assign the value it returned (our inner `bar()` function) to a variable called `baz`, and then we actually invoke `baz()`, which of course is invoking our inner function `bar()`, just by a different identifier reference.
+
+`bar()` is executed, for sure. But in this case, it's executed *outside* of its declared lexical scope.
+
+After `foo()` executed, normally we would expect that the entirety of the inner scope of `foo()` would go away, because we know that the *Engine* employs a *Garbage Collector* that comes along and frees up memory once it's no longer in use. Since it would appear that the contents of `foo()` are no longer in use, it would seem natural that they should be considered *gone*.
+
+But the "magic" of closures does not let this happen. That inner scope is in fact *still* "in use", and thus does not go away. Who's using it? **The function `bar()` itself**.
+
+By virtue of where it was declared, `bar()` has a lexical scope closure over that inner scope of `foo()`, which keeps that scope alive for `bar()` to reference at any later time.
+
+**`bar()` still has a reference to that scope, and that reference is called closure.**
+
+So, a few microseconds later, when the variable `baz` is invoked (invoking the inner function we initially labeled `bar`), it duly has *access* to author-time lexical scope, so it can access the variable `a` just as we'd expect.
+
+The function is being invoked well outside of its author-time lexical scope. **Closure** lets the function continue to access the lexical scope it was defined in at author-time.
+
+Consider another example [Demo](src/demo-files/closure2.js)
+
+We pass the inner function `baz` over to `bar`, and call that inner function (labeled `fn` now), and when we do, its closure over the inner scope of `foo()` is observed, by accessing `a`.
+
+Passing around these functions can be indirect too.
+
+Consider following example [Demo](src/demo-files/closure3.js)
+
+Whatever facility we use to *transport* an inner function outside of its lexical scope, it will maintain a scope reference to where it was originally declared, and wherever we execute it, that closure will be exercised. 
+
+The previous code snippets are somewhat academic and artificially constructed to illustrate *using closure*.
+
+Let's look at a real example:
+
+```js
+    function wait(message) {
+    
+        setTimeout( function timer(){
+            console.log( message );
+        }, 1000 );
+    
+    }
+    
+    wait( "Hello, closure!" );
+```
+
+We take an inner function (named `timer`) and pass it to `setTimeout(..)`. But `timer` has a scope closure over the scope of `wait(..)`, indeed keeping and using a reference to the variable `message`.
+
+A thousand milliseconds after we have executed `wait(..)`, and its inner scope should otherwise be long gone, that inner function `timer` still has closure over that scope.
+
+whenever* and *wherever* you treat functions (which access their own respective lexical scopes) as first-class values and pass them around, you are likely to see those functions exercising closure. Be that timers, event handlers, Ajax requests, cross-window messaging, web workers, or any of the other asynchronous (or synchronous!) tasks.
+
+[Quiz](src/quiz-files/quiz2.js)
+
+`Block Scoping Revisited`
+
+**It essentially turns a block into a scope that we can close over.** So, the following awesome code "just works":
+
+```js
+    for (var i=1; i<=5; i++) {
+        let j = i; // yay, block-scope for closure!
+        setTimeout( function timer(){
+            console.log( j );
+        }, j*1000 );
+    }
+```
+
+There's a special behavior defined for `let` declarations used in the head of a for-loop. This behavior says that the variable will be declared not just once for the loop, **but each iteration**. And, it will, helpfully, be initialized at each subsequent iteration with the value from the end of the previous iteration.
+
+```js
+    for (let i=1; i<=5; i++) {
+        setTimeout( function timer(){
+            console.log( i );
+        }, i*1000 );
+    }
+```
+
+Block scoping and closure working hand-in-hand, solving all the world's problems.
+
+`Modules`
+
+There are other code patterns which leverage the power of closure but which do not on the surface appear to be about callbacks. Let's examine the most powerful of them: *the module*.
+
+module example:
+
+```js
+    function foo() {
+    	var something = "cool";
+    	var another = [1, 2, 3];
+    
+    	function doSomething() {
+    		console.log( something );
+    	}
+    
+    	function doAnother() {
+    		console.log( another.join( " ! " ) );
+    	}
+    }
+```
+
+As this code stands right now, there's no observable closure going on. We simply have some private data variables `something` and `another`, and a couple of inner functions `doSomething()` and `doAnother()`, which both have lexical scope (and thus closure!) over the inner scope of `foo()`.
+
+But now consider the following:
+
+```js
+    function CoolModule() {
+        var something = "cool";
+        var another = [1, 2, 3];
+    
+        function doSomething() {
+            console.log( something );
+        }
+    
+        function doAnother() {
+            console.log( another.join( " ! " ) );
+        }
+    
+        return {
+            doSomething: doSomething,
+            doAnother: doAnother
+        };
+    }
+    
+    var foo = CoolModule();
+    
+    foo.doSomething(); // cool
+    foo.doAnother(); // 1 ! 2 ! 3
+```
+
+This is the pattern in JavaScript we call *module*. The most common way of implementing the module pattern is often called "Revealing Module", and it's the variation we present here.
+
+Firstly, `CoolModule()` is just a function, but it *has to be invoked* for there to be a module instance created. Without the execution of the outer function, the creation of the inner scope and the closures would not occur.
+
+Secondly, the `CoolModule()` function returns an object, denoted by the object-literal syntax `{ key: value, ... }`. The object we return has references on it to our inner functions, but *not* to our inner data variables. We keep those hidden and private. It's appropriate to think of this object return value as essentially a **public API for our module**.
+
+This object return value is ultimately assigned to the outer variable `foo`, and then we can access those property methods on the API, like `foo.doSomething()`.
+
+The `doSomething()` and `doAnother()` functions have closure over the inner scope of the module "instance" (arrived at by actually invoking `CoolModule()`). When we transport those functions outside of the lexical scope, by way of property references on the object we return, we have now set up a condition by which closure can be observed and exercised.
+
+To state it more simply, there are two "requirements" for the module pattern to be exercised:
+
+1. There must be an outer enclosing function, and it must be invoked at least once (each time creates a new module instance).
+2. The enclosing function must return back at least one inner function, so that this inner function has closure over the private scope, and can access and/or modify that private state.
+
+An object with a function property on it alone is not *really* a module. An object which is returned from a function invocation which only has data properties on it and no closured functions is not *really* a module, in the observable sense.
+
+The code snippet above shows a standalone module creator called `CoolModule()` which can be invoked any number of times, each time creating a new module instance. A slight variation on this pattern is when you only care to have one instance, a "singleton" of sorts:
+
+Let's try to implement this [Demo](src/demo-files/demo14.js)
+
+Modules are just functions, so they can receive parameters:
+
+```js
+    function CoolModule(id) {
+        function identify() {
+            console.log( id );
+        }
+    
+        return {
+            identify: identify
+        };
+    }
+    
+    var foo1 = CoolModule( "foo 1" );
+    var foo2 = CoolModule( "foo 2" );
+    
+    foo1.identify(); // "foo 1"
+    foo2.identify(); // "foo 2"
+```
+
+Another slight but powerful variation on the module pattern is to name the object you are returning as your public API:
+
+[Demo](src/demo-files/demo15.js)
+
+By retaining an inner reference to the public API object inside your module instance, you can modify that module instance **from the inside**, including adding and removing methods, properties, *and* changing their values.
