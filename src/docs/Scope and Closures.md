@@ -34,7 +34,7 @@ First thing compiler does is perform lexing to break the statement to tokens and
 But when Compiler comes to code generation it will treat this program a little differently.
 1. On Encountering `var a`, Compiler asks Scope to see if `a` exists for this particular scope collection. If so compile ignores the declaration and moves on. Otherwise, Compiler asks Scope to declare a new variable called `a` for that scope collection.
 
- [Demo](src/demo-files/demo1.js)
+ [Demo](../demo-files/demo1.js)
     
 2. Compiler produces code to Engine to later handle `a = 2` assignment. The code Engine asks Scope if there is a variable called `a` accessible in current scope collection. If so Engine uses it or looks elsewhere.
 Finally if it is unable to find it, it throws out an Error.
@@ -43,26 +43,26 @@ Finally if it is unable to find it, it throws out an Error.
 1.**LHS**: look-up for the existence of the variable. `var a = 2;`
 2.**RHS**: look-up for the variable value. `console.log(a);`
 
-[Demo](src/demo-files/demo2.js)
+[Demo](../demo-files/demo2.js)
 
-Time for a quick [Quiz](src/quiz-files/quiz1.js):
+Time for a quick [Quiz](../quiz-files/quiz1.js):
 
 **Nested Scope**:
 We mentioned Scope is a set of rules for looking up variables, but there is usually more than one Scope to consider.
 If a variable is not found in the current Scope collection continue looking until found or outermost/global scope has been reached.
-[Demo](src/demo-files/demo3.js)
+[Demo](../demo-files/demo3.js)
 
 **Errors**:
 Does it really matter if it is a LHS or RHS lookup?
 Because these two lookups behave differently in case variable is not yet declared.
 
 If RHS lookup fails it results in `Reference Error`
-[Demo](src/demo-files/demo4.js)
+[Demo](../demo-files/demo4.js)
 If LHS lookup fails it creates a new Undeclared variable in global Scope in normal mode(Throws `Reference Error` in Strict mode)
-[Demo](src/demo-files/demo5.js)
+[Demo](../demo-files/demo5.js)
 
 Finally if a variable is found for an RHS look-up but you try to do something with its value that is impossible, Engine throws `TypeError`     
-[Demo](src/demo-files/demo6.js)
+[Demo](../demo-files/demo6.js)
 
 `Reference Error` is related to Scope-resolution failure.
 `Type error` implies that Scope-resolution was successful, but there was an illegal/impossible action on the value.
@@ -79,7 +79,7 @@ In simpler words lexical scope is based on where variables and blocks of scope a
 Scope look-ups stop once they find the first match.
 Same variable name can be specified at multiple layers of nested scope aka shadowing. (inner variable shadows outer variable).
 Regardless of shadowing, scope lookup always starts at innermost scope being executed at that time, and works its way outwards until first match.
-[Demo](src/demo-files/demo8.js)
+[Demo](../demo-files/demo8.js)
   
 *Note: Global variables are automatic properties of global object (`window` for browsers) so it is possible to reference a global variable as a property reference to the global  object.
 ```javascript
@@ -98,7 +98,7 @@ But what exactly makes a new bubble? Is it only the function? Can other structur
 The most common answer to those questions is that JavaScript has function-based scope. That is, each function you declare creates a bubble for itself, but no other structures create their own scope bubbles. As we'll see in just a little bit, this is not quite true.
 
 But first, let's explore function scope and its implications.
-[Demo](src/demo-files/demo8.js)
+[Demo](../demo-files/demo8.js)
  **It doesn't matter** *where* in the scope a declaration appears, the variable or function belongs to the containing scope bubble, regardless. We'll explore how exactly *that* works in the next chapter.
 Function scope encourages the idea that all variables belong to the function, and can be used and reused throughout the entirety of the function (and indeed, accessible even to nested scopes). This design approach can be quite useful, and certainly can make full use of the "dynamic" nature of JavaScript variables to take on values of different types as needed.
 
@@ -110,14 +110,14 @@ Why would "hiding" variables and functions be a useful technique?
 
 There's a variety of reasons motivating this scope-based hiding. They tend to arise from the software design principle "Principle of Least Privilege", also sometimes called "Least Authority" or "Least Exposure". This principle states that in the design of software, such as the API for a module/object, you should expose only what is minimally necessary, and "hide" everything else.
 
-[Bad Design Example](src/demo-files/bad-design.js)
-[Better Design Example](src/demo-files/better-design.js)
+[Bad Design Example](../demo-files/bad-design.js)
+[Better Design Example](../demo-files/better-design.js)
 
 `Collision Avoidance`:
 
 Another benefit of "hiding" variables and functions inside a scope is to avoid unintended collision between two different identifiers with the same name but different intended usages. Collision results often in unexpected overwriting of values.
 
-[Demo](src/demo-files/demo9.js) 
+[Demo](../demo-files/demo9.js) 
 
 `Global "Namespaces"`
 
@@ -125,7 +125,7 @@ A particularly strong example of (likely) variable collision occurs in the globa
 
 Such libraries typically will create a single variable declaration, often an object, with a sufficiently unique name, in the global scope. This object is then used as a "namespace" for that library, where all specific exposures of functionality are made as properties of that object (namespace), rather than as top-level lexically scoped identifiers themselves.
 
-[Global NameSpace example](src/demo-files/global-name-space.js)
+[Global NameSpace example](../demo-files/global-name-space.js)
 
 **Functions As Scopes**:
 
@@ -151,7 +151,7 @@ For example:
 While this technique "works", it is not necessarily very ideal. There are a few problems it introduces. The first is that we have to declare a named-function `foo()`, which means that the identifier name `foo` itself "pollutes" the enclosing scope (global, in this case). We also have to explicitly call the function by name (`foo()`) so that the wrapped code actually executes.
 It would be more ideal if the function didn't need a name (or, rather, the name didn't pollute the enclosing scope), and if the function could automatically be executed.
 
-[Demo](src/demo-files/function-expression.js)
+[Demo](../demo-files/function-expression.js)
 
 Now that we have a function as an expression by virtue of wrapping it in a `( )` pair, we can execute that function by adding another `()` on the end, like `(function foo(){ .. })()`. The first enclosing `( )` pair makes the function an expression, and the second `()` executes the function.
  This pattern is so common, a few years ago the community agreed on a term for it: **IIFE**, which stands for **I**mmediately **I**nvoked **F**unction **E**xpression.
@@ -193,10 +193,10 @@ Fortunately, ES6 changes that, and introduces a new keyword `let` which sits alo
 
 The `let` keyword attaches the variable declaration to the scope of whatever block (commonly a `{ .. }` pair) it's contained in. In other words, `let` implicitly hijacks any block's scope for its variable declaration.
 
-[Demo](src/demo-files/demo10.js)
+[Demo](../demo-files/demo10.js)
 
 Creating explicit blocks for block-scoping can address some of these concerns, making it more obvious where variables are attached and not. Usually, explicit code is preferable over implicit or subtle code. This explicit block-scoping style is easy to achieve, and fits more naturally with how block-scoping works in other languages
-[Explicit-blocks Demo](src/demo-files/explicit-blocks.js)
+[Explicit-blocks Demo](../demo-files/explicit-blocks.js)
 
 In next chapter, we will address hoisting, which talks about declarations being taken as existing for the entire scope in which they occur.
 
@@ -213,7 +213,7 @@ However, declarations made with `let` will *not* hoist to the entire scope of th
 
 In addition to `let`, ES6 introduces `const`, which also creates a block-scoped variable, but whose value is fixed (constant). Any attempt to change that value at a later time results in an error.
 
-[Demo](src/demo-files/demo11.js)
+[Demo](../demo-files/demo11.js)
 
 **Chapter 3**: Hoisting?
 -----------------------------------------
@@ -282,10 +282,10 @@ Function declarations are hoisted, as we just saw. But function expressions are 
 
 Both function declarations and variable declarations are hoisted. But a subtle detail (that *can* show up in code with multiple "duplicate" declarations) is that functions are hoisted first, and then variables.
 
-[Demo](src/demo-files/demo12.js)
+[Demo](../demo-files/demo12.js)
 
 While multiple/duplicate `var` declarations are effectively ignored, subsequent function declarations *do* override previous ones.
-[Demo](src/demo-files/demo13.js)
+[Demo](../demo-files/demo13.js)
 
 **Chapter 4**: Scope Closure
 -----------------------------------------
@@ -321,7 +321,7 @@ function `bar()` has a *closure* over the scope of `foo()` (and indeed, even ove
 
 But, closure defined in this way is not directly *observable*, nor do we see closure *exercised* in that snippet. We clearly see lexical scope,
 
-Let's consider the following [Demo](src/demo-files/closure1.js)
+Let's consider the following [Demo](../demo-files/closure1.js)
 
 The function `bar()` has lexical scope access to the inner scope of `foo()`. But then, we take `bar()`, the function itself, and pass it *as* a value. In this case, we `return` the function object itself that `bar` references.
 
@@ -341,13 +341,13 @@ So, a few microseconds later, when the variable `baz` is invoked (invoking the i
 
 The function is being invoked well outside of its author-time lexical scope. **Closure** lets the function continue to access the lexical scope it was defined in at author-time.
 
-Consider another example [Demo](src/demo-files/closure2.js)
+Consider another example [Demo](../demo-files/closure2.js)
 
 We pass the inner function `baz` over to `bar`, and call that inner function (labeled `fn` now), and when we do, its closure over the inner scope of `foo()` is observed, by accessing `a`.
 
 Passing around these functions can be indirect too.
 
-Consider following example [Demo](src/demo-files/closure3.js)
+Consider following example [Demo](../demo-files/closure3.js)
 
 Whatever facility we use to *transport* an inner function outside of its lexical scope, it will maintain a scope reference to where it was originally declared, and wherever we execute it, that closure will be exercised. 
 
@@ -373,7 +373,7 @@ A thousand milliseconds after we have executed `wait(..)`, and its inner scope s
 
 whenever* and *wherever* you treat functions (which access their own respective lexical scopes) as first-class values and pass them around, you are likely to see those functions exercising closure. Be that timers, event handlers, Ajax requests, cross-window messaging, web workers, or any of the other asynchronous (or synchronous!) tasks.
 
-[Quiz](src/quiz-files/quiz2.js)
+[Quiz](../quiz-files/quiz2.js)
 
 `Block Scoping Revisited`
 
@@ -469,7 +469,7 @@ An object with a function property on it alone is not *really* a module. An obje
 
 The code snippet above shows a standalone module creator called `CoolModule()` which can be invoked any number of times, each time creating a new module instance. A slight variation on this pattern is when you only care to have one instance, a "singleton" of sorts:
 
-Let's try to implement this [Demo](src/demo-files/demo14.js)
+Let's try to implement this [Demo](../demo-files/demo14.js)
 
 Modules are just functions, so they can receive parameters:
 
@@ -493,6 +493,6 @@ Modules are just functions, so they can receive parameters:
 
 Another slight but powerful variation on the module pattern is to name the object you are returning as your public API:
 
-[Demo](src/demo-files/demo15.js)
+[Demo](../demo-files/demo15.js)
 
 By retaining an inner reference to the public API object inside your module instance, you can modify that module instance **from the inside**, including adding and removing methods, properties, *and* changing their values.

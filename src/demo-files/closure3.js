@@ -7,7 +7,7 @@ function foo() {
         console.log(a);
     }
 
-    fn = baz; // assign `baz` to global variable
+    fn = baz;
 }
 
 function bar() {
