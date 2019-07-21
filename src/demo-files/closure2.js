@@ -7,7 +7,7 @@ function foo() {
 
     bar(baz);
 }
-
+foo();
 function bar(fn) {
     fn();
 }

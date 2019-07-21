@@ -6,4 +6,5 @@ var MyReallyCoolLibrary = {
     doAnotherThing: function () {
         // ...
     }
+
 };
