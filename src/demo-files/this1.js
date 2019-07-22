@@ -1,6 +1,5 @@
 function foo(num) {
     console.log( "foo: " + num );
-
     // keep track of how many times `foo` is called
     this.count++;
 }

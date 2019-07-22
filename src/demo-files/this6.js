@@ -12,8 +12,8 @@ var obj2 = {
     foo: foo
 };
 
-obj1.foo();
-obj2.foo();
+// obj1.foo(); //2
+// obj2.foo(); //3
 
-obj1.foo.call(obj2);
-obj2.foo.call(obj1);
+obj1.foo.call(obj2); //3
+obj2.foo.call(obj1); //2
