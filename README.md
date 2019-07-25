@@ -8,3 +8,4 @@ Topics Covered:
 3. [this keyword](src/docs/This%20keyword.md)
 4. [Objects in JavaScript](src/docs/Object.md)
 5. [Classes in Javascript](src/docs/Classes.md)
+6. [Prototypes](src/docs/Prototypes.md)
